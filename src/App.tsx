@@ -12,7 +12,7 @@ const App: React.FC = () => {
     }
   };
 
-  const uploadFileToServer = async (file: File): Promise<string> => {
+  const uploadFileToServer = async (file: File): Promise<{fileUploadId: string, imageAnalysis: any}> => {
     const formData = new FormData();
     formData.append('file', file);
     
@@ -27,10 +27,10 @@ const App: React.FC = () => {
     }
     
     const data = await response.json();
-    return data.fileUploadId;
+    return { fileUploadId: data.fileUploadId, imageAnalysis: data.imageAnalysis };
   };
 
-  const createPageOnServer = async (title: string, fileUploadId: string): Promise<string> => {
+  const createPageOnServer = async (title: string, fileUploadId: string, imageAnalysis: any): Promise<string> => {
     const response = await fetch('http://localhost:3001/api/create-page', {
       method: 'POST',
       headers: {
@@ -39,6 +39,7 @@ const App: React.FC = () => {
       body: JSON.stringify({
         title,
         fileUploadId,
+        imageAnalysis,
       }),
     });
 
@@ -61,9 +62,9 @@ const App: React.FC = () => {
     setLoading(true);
     try {
       // 1. Upload file through backend server
-      const fileUploadId = await uploadFileToServer(file);
+      const { fileUploadId, imageAnalysis } = await uploadFileToServer(file);
       // 2. Create Notion page through backend server
-      const pageId = await createPageOnServer(title, fileUploadId);
+      const pageId = await createPageOnServer(title, fileUploadId, imageAnalysis);
       setMessage(`Success! Notion page created with uploaded file. Page ID: ${pageId}`);
       setTitle('');
       setFile(null);

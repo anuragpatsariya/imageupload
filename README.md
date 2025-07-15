@@ -8,7 +8,7 @@ This application allows you to upload files to Notion and create pages with thos
 
 First, install the backend dependencies:
 
-```bash
+   ```bash
 cd image-upload
 npm install --save express cors multer node-fetch@2 form-data
 ```
@@ -34,9 +34,9 @@ The server will run on port 3001.
 
 In a new terminal:
 
-```bash
-npm start
-```
+   ```bash
+   npm start
+   ```
 
 The React app will run on port 3000.
 
