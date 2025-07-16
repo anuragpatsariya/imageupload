@@ -136,7 +136,7 @@ async function analyzeImage(imageBuffer) {
             content: [
               {
                 type: 'text',
-                text: 'Analyze this image and categorize it into one of these types: 1. "bird" (for any bird species), 2. "animal" (for mammals, reptiles, fish, etc.), 3. "landscape" (for mountains, forests, beaches, waterfalls, etc.), 4. "others" (for buildings, cities, objects, etc.). Then provide a brief description. Format your response as: Type: [type] Description: [description]'
+                text: 'Analyze this image and categorize it into one of these types: 1. "bird" (for any bird species), 2. "animal" (for mammals, reptiles, fish, etc.), 3. "landscape" (for mountains, forests, beaches, waterfalls, etc.), 4. "others" (for buildings, cities, objects, etc.).Then provide a brief description. Format your response as: Type: [type] Description: [description]'
               },
               {
                 type: 'image_url',
@@ -170,6 +170,67 @@ async function analyzeImage(imageBuffer) {
     };
   } catch (error) {
     console.error('Image analysis error:', error);
+    return null;
+  }
+}
+
+// Function to generate page title using OpenAI Vision API
+async function generatePageTitle(imageBuffer) {
+  if (!OPENAI_API_KEY) {
+    return null;
+  }
+
+  try {
+    // Resize image to reduce size for API
+    const resizedImageBuffer = await sharp(imageBuffer)
+      .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 80 })
+      .toBuffer();
+
+    // Convert to base64
+    const base64Image = resizedImageBuffer.toString('base64');
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: 'Generate a specific, descriptive title for this image. The title should be concise (max 60 characters) but descriptive enough to identify the main subject. Focus on the most prominent element in the image. Examples: "Red Cardinal on Snowy Branch", "Golden Retriever in Garden", "Mountain Lake at Sunset". Return only the title, no additional text.'
+              },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:image/jpeg;base64,${base64Image}`
+                }
+              }
+            ]
+          }
+        ],
+        max_tokens: 100
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('OpenAI title generation error:', error);
+      return null;
+    }
+
+    const data = await response.json();
+    const title = data.choices[0].message.content.trim();
+    
+    return title;
+  } catch (error) {
+    console.error('Title generation error:', error);
     return null;
   }
 }
@@ -256,15 +317,22 @@ app.post('/api/upload-file', upload.single('file'), async (req, res) => {
     
     // Analyze image if it's an image file
     let imageAnalysis = null;
+    let generatedTitle = null;
     if (file.mimetype.startsWith('image/')) {
       console.log('Analyzing image with OpenAI...');
       imageAnalysis = await analyzeImage(processedBuffer);
       if (imageAnalysis) {
         console.log('Image analysis result:', imageAnalysis);
       }
+      
+      console.log('Generating page title with OpenAI...');
+      generatedTitle = await generatePageTitle(processedBuffer);
+      if (generatedTitle) {
+        console.log('Generated title:', generatedTitle);
+      }
     }
     
-    res.json({ fileUploadId, imageAnalysis });
+    res.json({ fileUploadId, imageAnalysis, generatedTitle });
   } catch (error) {
     console.error('Upload error:', error);
     res.status(500).json({ error: error.message });
@@ -336,7 +404,7 @@ app.post('/api/create-page', async (req, res) => {
               {
                 type: 'text',
                 text: {
-                  content: `Image Analysis: ${imageAnalysis.type}`
+                  content: `${imageAnalysis.type}`
                 }
               }
             ]
