@@ -136,7 +136,8 @@ async function analyzeImage(imageBuffer) {
             content: [
               {
                 type: 'text',
-                text: 'Analyze this image and categorize it into one of these types: 1. "bird" (for any bird species), 2. "animal" (for mammals, reptiles, fish, etc.), 3. "landscape" (for mountains, forests, beaches, waterfalls, etc.), 4. "others" (for buildings, cities, objects, etc.).Then provide a brief description. Format your response as: Type: [type] Description: [description]'
+                //text: 'Analyze this image and categorize it into one of these types: 1. "bird" (for any bird species), 2. "animal" (for mammals, reptiles, fish, etc.), 3. "landscape" (for mountains, forests, beaches, waterfalls, etc.), 4. "others" (for buildings, cities, objects, etc.).Then provide a brief description. Format your response as: Type: [type] Description: [description]'
+                text: 'Take a thoughtful look at this image and decide which of the following categories it fits best: Bird – if a bird (of any kind) is the main focus, Animal – if it shows a mammal, reptile, fish, or other creature (not a bird), Landscape – if it features natural scenery like mountains, forests, beaches, or waterfalls, Others – for anything else: buildings, objects, cities, people, abstract scenes, etc. Then, write a brief but vivid description of what’s going on in the image. If it feels natural, add a touch of artistic expression or light humor — but only when it fits the mood of the image. Don’t force it. Format your response like this:Type: [category] Description: [friendly and colorful description — with a dash of wit or artistry if appropriate]'
               },
               {
                 type: 'image_url',
