@@ -109,7 +109,7 @@ const App: React.FC = () => {
 
   return (
     <div style={{ maxWidth: 500, margin: '2rem auto', padding: 24, border: '1px solid #eee', borderRadius: 8 }}>
-      <h2>Create Notion Page with File Upload</h2>
+      <h2>Notion Image Upload & AI Analyzer</h2>
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: 16 }}>
           <label>Page Title (Optional - will auto-generate if empty):</label>
